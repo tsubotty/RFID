@@ -41,14 +41,14 @@ import org.apache.http.util.EntityUtils;
 
 public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener{
 	
-	DOTR_Util _reader;
-	String _macAddress;   //= "00:18:9A:05:9C:62";
-	BluetoothAdapter _bt = BluetoothAdapter.getDefaultAdapter();
-	static final String TAG = MainActivity.class.getSimpleName(); // Name of this class 
-	TextView _tv;
-	Handler _handler; // For UI control
-	String _epc; // EPC Tag Name which are read from the reader
-	String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
+	private DOTR_Util _reader;
+	private String _macAddress;   //= "00:18:9A:05:9C:62";
+	private BluetoothAdapter _bt = BluetoothAdapter.getDefaultAdapter();
+	private static final String TAG = MainActivity.class.getSimpleName(); // Name of this class 
+	private TextView _tv;
+	private Handler _handler; // For UI control
+	private String _epc; // EPC Tag Name which are read from the reader
+	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +58,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         _handler = new Handler();
 		_tv = (TextView)findViewById(R.id.textView1);
         checkBluetooth();
-        setStartButtonListener();
+        configureButtons();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,7 +68,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         return true;
     }
     
-    private void setStartButtonListener() { // Button Settings
+    private void configureButtons() {
     	Button connectBtn = (Button)findViewById(R.id.connect);
     	Button disconBtn = (Button)findViewById(R.id.disconnect);
     	Button getBtn = (Button)findViewById(R.id.getButton);
@@ -79,31 +78,29 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     }
     
     private void checkBluetooth() {
-    	if(!_bt.equals(null)){
-            //Bluetooth available
+    	if (!_bt.equals(null)) { //Bluetooth available
             Log.d(TAG,"Bluetooth available");
-        }else{
-            //not available
+        } else { //not available
             Log.d(TAG,"Bluetooth not available");
             finish();
         }
         boolean btEnable = _bt.isEnabled();
-        if(btEnable == true){
-            //case of bluetooth 
-        }else{
+        if (btEnable == true) { //case of bluetooth enable 
+            Set<BluetoothDevice> pairedDevices = _bt.getBondedDevices();
+            if(pairedDevices.size() > 0){
+                //There are devices which had connected before.
+                for(BluetoothDevice device:pairedDevices){
+                    //getName() -> device name
+                    //getAddress -> MAC address
+                    Log.d(TAG, device.getName() + "\n" + device.getAddress());
+                    _macAddress = device.getAddress();
+                }
+            }
+        } else {
             finish();
         }
         
-        Set<BluetoothDevice> pairedDevices = _bt.getBondedDevices();
-        if(pairedDevices.size() > 0){
-            //There are devices which had connected before.
-            for(BluetoothDevice device:pairedDevices){
-                //getName()�E�E�Eget device name
-                //getAddress()�E�E�Eget MAC address
-                Log.d(TAG, device.getName() + "\n" + device.getAddress());
-                _macAddress = device.getAddress();
-            }
-        }
+
     }
     
     public void executeHttpGet(){
@@ -174,22 +171,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	}
     }
     
-    public void	onTriggerChanged(boolean trigger) {
-    	Log.d(TAG, "ontriggerchanged");
-    	if (_reader.isConnect()) {
-	    	if (trigger) {
-	    		_reader.inventoryTag(false, EnMaskFlag.None, 0);
-	    	} else {
-	    		_reader.stop();
-	    	}
-    	} else {
-    		Log.d(TAG, "not connected");
-    	}
-    	
-    }
-    
+    @Override
     public void onReadTagData(String data, String epc) {
-    	//TextView tv = (TextView)findViewById(R.id.textView1);
     	_tv.setText(data + ":	" + epc );
     	Log.d(TAG, data + ":" + epc);
     }
@@ -221,7 +204,17 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 
 
 	@Override
-	public void onTriggerChaned(boolean arg0) {
+	public void onTriggerChaned(boolean trigger) {
+    	Log.d(TAG, "ontriggerchanged");
+    	if (_reader.isConnect()) {
+	    	if (trigger) {
+	    		_reader.inventoryTag(false, EnMaskFlag.None, 0);
+	    	} else {
+	    		_reader.stop();
+	    	}
+    	} else {
+    		Log.d(TAG, "not connected");
+    	}
 	}
 
 
