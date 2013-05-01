@@ -2,14 +2,6 @@ package com.example.rfid;
 
 import java.util.Set;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -18,26 +10,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-//import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
-import jp.co.tss21.uhfrfid.dotr_android.*;
 import android.os.Handler;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import org.apache.http.Header;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.util.EntityUtils;
+
+import jp.co.tss21.uhfrfid.dotr_android.*;
+
 
 public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener{
 	
@@ -49,6 +27,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private Handler _handler; // For UI control
 	private String _epc; // EPC Tag Name which are read from the reader
 	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
+	private HttpPostTask hpt = null;
+	private HttpPostHandler hph = null;
+	
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,48 +84,15 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 
     }
     
-    public void executeHttpGet(){
-        DefaultHttpClient httpclient = null;
-        HttpHost targetHost = null;
-        HttpEntity entity = null;
-        try {
-            httpclient = new DefaultHttpClient();
-            targetHost = new HttpHost("203.178.135.39", 80, "http");
-            String url = "http://203.178.135.39/~tsubo/index.php?q=" + _epc;
-            //HttpGet httpget = new HttpGet("https://news.google.com/news/feeds?q=google&output=rss");
-            HttpGet httpget = new HttpGet(url);
-            HttpResponse response = httpclient.execute(targetHost, httpget);
-            entity = response.getEntity();
-            if(response.getStatusLine().getStatusCode() != 200 ){
-                System.out.println("StatusCode:" + response.getStatusLine().getStatusCode());
-                return;
-            }
-            if (entity != null) {
-                System.out.println(EntityUtils.toString(entity));
-                //System.out.println("length: " + entity.getContentLength());
-                //EntityUtils.consume(entity);
-                //depriciated
-                //entity.consumeContent();
-                //System.out.println("hoge");
-                _tv.setText("hoge");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            _tv.setText("catch error");
-        }finally {
-            httpclient.getConnectionManager().shutdown();
-        }
-    }
-    
     @Override
     public void onClick(View v) {
     	switch(v.getId()) {
     		case R.id.getButton:
-    			if (_epc != "") {
-    				executeHttpGet();
-    			} else {
-    				//executeHttpGet();
-    				;
+    			if (hpt == null) {
+    				/*
+    				hph = new HttpPostHandler();
+    				hpt = new HttpPostTask();
+    				*/
     			}
     			break;
     		case R.id.connect:
