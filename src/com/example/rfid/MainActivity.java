@@ -1,6 +1,9 @@
 package com.example.rfid;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.os.Bundle;
@@ -17,6 +20,9 @@ import android.os.Handler;
 
 import jp.co.tss21.uhfrfid.dotr_android.*;
 
+//import net.sf.json.JSONObject;
+import net.arnx.jsonic.JSON;
+import com.google.gson.Gson;
 
 public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener{
 	
@@ -27,8 +33,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private TextView _tv;
 	private Handler _handler; // For UI control
 	private String _epc; // EPC Tag Name which are read from the reader
-	private ArrayList<String> _tagIDs;
+	private ArrayList<Map<String, String>> _tagIDs;
 	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
+	//private String _url = "133.11.236.196/api/update";
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
 	private TagAccessParameter _param = new TagAccessParameter();
@@ -41,7 +48,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         _reader = new DOTR_Util();
         _handler = new Handler();
 		_tv = (TextView)findViewById(R.id.textView1);
-		_tagIDs = new ArrayList<String>();
+		_tagIDs = new ArrayList<Map<String, String>>();
         checkBluetooth();
         configureButtons();
     }
@@ -96,7 +103,35 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			if (_hpt == null) {
     				_hph = new MyHttpPostHandler();
     				_hpt = new HttpPostTask(this, _url, _hph);
-    				_hpt.addPostParam("id", _epc);
+    				//JSONObject jsonObject = JSONObject.fromObject(_tagIDs);
+    				//Log.d(TAG, "jsonObject : " + jsonObject.toString());
+    				//POJO pojo = new POJO();
+    				
+    				MyItem mi = new MyItem();
+    				mi.list = new ArrayList<Row>();
+    				Row row = new Row();
+					row.tag_id = "tag_id";
+					row.place = "place";
+					mi.list.add(row);
+			    	Map map = new HashMap();
+			    	map.put("tag_id", "ddd");
+			    	map.put("place", "elab");
+			    	_tagIDs.add(map);
+    				for (Map<String, String> m : _tagIDs) {
+    					row = new Row();
+    					row.tag_id = m.get("tag_id");
+    					row.place = m.get("place");
+    					mi.list.add(row);
+    				}
+    				
+					Row hoge = mi.list.get(0);
+					Log.d(TAG, "mi " + hoge.tag_id);
+    				//String jsonString = JSON.encode(hoge, true);
+					String jsonString = new Gson().toJson(mi.list, ArrayList.class);
+    				Log.d(TAG, "jsonString   " + jsonString);
+    				//String jsonString = "hoge";
+    				_hpt.addPostParam("body", jsonString);
+    				//_hpt.addPostParam("body", "ttttttttt");
     				//_hpt.addPostParam("place", );
     				_hpt.execute();
     				_tv.setText(_hph._response);
@@ -129,7 +164,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     @Override
     public void onReadTagData(String data, String epc) {
     	_epc = data + " : " + epc;
-    	_tagIDs.add("Number " + _tagIDs.size() + " : " + data + " : " + epc);
+    	Map map = new HashMap();
+    	map.put("tag_id", epc);
+    	map.put("place", "elab");
+    	_tagIDs. add(map);
+    	//_tagIDs.add("Number " + _tagIDs.size() + " : " + data + " : " + epc);
     	Log.d(TAG, "RTD" + _tagIDs.size());
     	_handler.post(new Runnable() {
 			@Override
@@ -194,5 +233,16 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	@Override
 	public void onWriteTagData(String arg0) {
 	}
+	
+	public class MyItem {
+		//List<Row> list;
+		ArrayList<Row> list;
+		
+	}
+	public class Row {
+		String tag_id;
+		String place;
+	}
+	
     
 }

@@ -145,7 +145,9 @@ public class HttpPostTask extends AsyncTask<Void, Void, Void> {
     HttpPost request = new HttpPost( url );
     try {
       // 送信パラメータのエンコードを指定
+      request.setHeader("CONTENT_TYPE", "application/json; charset=UTF-8");
       request.setEntity(new UrlEncodedFormEntity(post_params, request_encoding));
+      Log.d("class", "request   " + request);
     } catch (UnsupportedEncodingException e1) {
       e1.printStackTrace();
       http_err_msg = "不正な文字コード";
