@@ -28,7 +28,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private String _epc; // EPC Tag Name which are read from the reader
 	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
 	private HttpPostTask hpt = null;
-	private HttpPostHandler hph = null;
+	private MyHttpPostHandler hph = null;
 	
 	
     @Override
@@ -89,10 +89,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	switch(v.getId()) {
     		case R.id.getButton:
     			if (hpt == null) {
-    				/*
-    				hph = new HttpPostHandler();
-    				hpt = new HttpPostTask();
-    				*/
+    				hph = new MyHttpPostHandler();
+    				hpt = new HttpPostTask(this, _url, hph);
+    				hpt.addPostParam("q", "hoge");
+    				hpt.execute();
+    				_tv.setText(hph._response);
     			}
     			break;
     		case R.id.connect:

@@ -190,6 +190,7 @@ public class HttpPostTask extends AsyncTask<Void, Void, Void> {
       bundle.putString("http_response", http_ret_msg);
     }
     message.setData(bundle);
+    Log.d("MainActivity.java", "http_ret_message : " + http_ret_msg);
 
     // óMŒ‹‰Ê‚ÉŠî‚Ã‚¢‚ÄUI‘€ì‚³‚¹‚é
     ui_handler.sendMessage(message);
