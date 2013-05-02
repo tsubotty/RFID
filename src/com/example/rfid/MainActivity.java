@@ -1,5 +1,6 @@
 package com.example.rfid;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import android.os.Bundle;
@@ -26,9 +27,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private TextView _tv;
 	private Handler _handler; // For UI control
 	private String _epc; // EPC Tag Name which are read from the reader
+	private ArrayList<String> _tagIDs;
 	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
-	private HttpPostTask hpt = null;
-	private MyHttpPostHandler hph = null;
+	private HttpPostTask _hpt = null;
+	private MyHttpPostHandler _hph = null;
+	private TagAccessParameter _param = new TagAccessParameter();
 	
 	
     @Override
@@ -38,6 +41,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         _reader = new DOTR_Util();
         _handler = new Handler();
 		_tv = (TextView)findViewById(R.id.textView1);
+		_tagIDs = new ArrayList<String>();
         checkBluetooth();
         configureButtons();
     }
@@ -56,6 +60,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	connectBtn.setOnClickListener(this);
     	disconBtn.setOnClickListener(this);
     	getBtn.setOnClickListener(this);
+    	_reader.setOnDotrEventListener(this);
     }
     
     private void checkBluetooth() {
@@ -88,18 +93,18 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     public void onClick(View v) {
     	switch(v.getId()) {
     		case R.id.getButton:
-    			if (hpt == null) {
-    				hph = new MyHttpPostHandler();
-    				hpt = new HttpPostTask(this, _url, hph);
-    				hpt.addPostParam("id", _epc);
-    				//hpt.addPostParam("place", );
-    				hpt.execute();
-    				_tv.setText(hph._response);
+    			if (_hpt == null) {
+    				_hph = new MyHttpPostHandler();
+    				_hpt = new HttpPostTask(this, _url, _hph);
+    				_hpt.addPostParam("id", _epc);
+    				//_hpt.addPostParam("place", );
+    				_hpt.execute();
+    				_tv.setText(_hph._response);
     			}
     			break;
     		case R.id.connect:
     			_tv.setText("hoge");
-    	    	_reader.setOnDotrEventListener(this);
+    	    	
     	    	Log.d(TAG, "before connect : " + _macAddress);
     	    	_reader.disconnect();
     	    	if (_reader.connect(_macAddress)) {
@@ -123,13 +128,26 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     
     @Override
     public void onReadTagData(String data, String epc) {
-    	_tv.setText(data + ":	" + epc );
-    	Log.d(TAG, data + ":" + epc);
+    	_epc = data + " : " + epc;
+    	_tagIDs.add("Number " + _tagIDs.size() + " : " + data + " : " + epc);
+    	Log.d(TAG, "RTD" + _tagIDs.size());
+    	_handler.post(new Runnable() {
+			@Override
+			public void run() {
+				_tv.setText(_epc);
+	    		Log.d(TAG, _epc);
+			}
+		});
     }
 
 	@Override
 	public void onConnected() {
-		_reader.inventoryTag(false, EnMaskFlag.None, 1000);
+		//_reader.inventoryTag(false, EnMaskFlag.None, 1000);
+		_param.setMemoryBank(EnMemoryBank.EPC);
+		_param.setWordOffset(1);
+		_param.setWordCount(1);
+		_param.setPassword(0);
+		_reader.readTag(_param, false, EnMaskFlag.None, 0);
 	}
 
 	@Override

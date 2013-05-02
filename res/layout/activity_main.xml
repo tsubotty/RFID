@@ -37,21 +37,6 @@
         android:text="@string/connect" />
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/textView1"
-        android:layout_marginTop="60dp"
-        android:text="@string/place"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-    
-    <EditText
-        android:id="@+id/place"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,5 +45,24 @@
         android:layout_marginTop="18dp"
         android:text="@string/tagIds"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/textView1"
+        android:layout_marginTop="14dp"
+        android:text="@string/place"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/place"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true"
+        android:ems="10"
+        android:inputType="text" />
 
 </RelativeLayout>
