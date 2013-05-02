@@ -91,7 +91,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			if (hpt == null) {
     				hph = new MyHttpPostHandler();
     				hpt = new HttpPostTask(this, _url, hph);
-    				hpt.addPostParam("q", "hoge");
+    				hpt.addPostParam("id", _epc);
+    				//hpt.addPostParam("place", );
     				hpt.execute();
     				_tv.setText(hph._response);
     			}
