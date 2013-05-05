@@ -18,7 +18,7 @@
         android:text="@string/disconnect" />
 
     <Button
-        android:id="@+id/getButton"
+        android:id="@+id/send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView2"
@@ -64,5 +64,23 @@
         android:layout_centerHorizontal="true"
         android:ems="10"
         android:inputType="text" />
+
+    <Button
+        android:id="@+id/decrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/send"
+        android:layout_alignBottom="@+id/send"
+        android:layout_alignRight="@+id/disconnect"
+        android:text="@string/decrease" />
+
+    <Button
+        android:id="@+id/read"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/decrease"
+        android:layout_marginTop="17dp"
+        android:layout_toLeftOf="@+id/decrease"
+        android:text="@string/read" />
 
 </RelativeLayout>

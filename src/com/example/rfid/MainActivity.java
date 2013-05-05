@@ -35,7 +35,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private String _epc; // EPC Tag Name which are read from the reader
 	private ArrayList<Map<String, String>> _tagIDs;
 	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
-	//private String _url = "133.11.236.196/api/update";
+	//private String _url = "http://133.11.236.196:8080/api/update";
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
 	private TagAccessParameter _param = new TagAccessParameter();
@@ -63,10 +63,12 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     private void configureButtons() {
     	Button connectBtn = (Button)findViewById(R.id.connect);
     	Button disconBtn = (Button)findViewById(R.id.disconnect);
-    	Button getBtn = (Button)findViewById(R.id.getButton);
+    	Button getBtn = (Button)findViewById(R.id.send);
+    	Button decBtn = (Button)findViewById(R.id.decrease);
     	connectBtn.setOnClickListener(this);
     	disconBtn.setOnClickListener(this);
     	getBtn.setOnClickListener(this);
+    	decBtn.setOnClickListener(this);
     	_reader.setOnDotrEventListener(this);
     }
     
@@ -99,47 +101,40 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     @Override
     public void onClick(View v) {
     	switch(v.getId()) {
-    		case R.id.getButton:
+    		case R.id.send:
     			if (_hpt == null) {
     				_hph = new MyHttpPostHandler();
-    				_hpt = new HttpPostTask(this, _url, _hph);
-    				//JSONObject jsonObject = JSONObject.fromObject(_tagIDs);
-    				//Log.d(TAG, "jsonObject : " + jsonObject.toString());
-    				//POJO pojo = new POJO();
-    				
-    				MyItem mi = new MyItem();
-    				mi.list = new ArrayList<Row>();
-    				Row row = new Row();
-					row.tag_id = "tag_id";
-					row.place = "place";
-					mi.list.add(row);
-			    	Map map = new HashMap();
-			    	map.put("tag_id", "ddd");
-			    	map.put("place", "elab");
-			    	_tagIDs.add(map);
-    				for (Map<String, String> m : _tagIDs) {
-    					row = new Row();
-    					row.tag_id = m.get("tag_id");
-    					row.place = m.get("place");
-    					mi.list.add(row);
-    				}
-    				
-					Row hoge = mi.list.get(0);
-					Log.d(TAG, "mi " + hoge.tag_id);
-    				//String jsonString = JSON.encode(hoge, true);
-					String jsonString = new Gson().toJson(mi.list, ArrayList.class);
-    				Log.d(TAG, "jsonString   " + jsonString);
-    				//String jsonString = "hoge";
-    				_hpt.addPostParam("body", jsonString);
-    				//_hpt.addPostParam("body", "ttttttttt");
-    				//_hpt.addPostParam("place", );
-    				_hpt.execute();
+    			}
+				_hpt = new HttpPostTask(this, _url, _hph);
+    			MyItem mi = new MyItem();
+    			mi.list = new ArrayList<Row>();
+    			Row row = new Row();
+    			row.tag_id = "aaaaaa";
+    			row.place = "todai";
+    			mi.list.add(row);
+    			Map map = new HashMap();
+    			map.put("tag_id", "bbbbbbbb");
+    			map.put("place", "elab");
+    			_tagIDs.add(map);
+    			for (Map<String, String> m : _tagIDs) {
+    				row = new Row();
+    				row.tag_id = m.get("tag_id");
+    				row.place = m.get("place");
+    				mi.list.add(row);
+    			}
+    			String jsonString = new Gson().toJson(mi.list, ArrayList.class);
+    			Log.d(TAG, "jsonString   " + jsonString);
+    			_hpt.addPostParam("body", jsonString);
+    			_hpt.execute();
+    			try {
     				_tv.setText(_hph._response);
+    				Log.d(TAG, _hph._response);
+    			} catch (Exception e) {
+    				Log.d(TAG, e.getMessage());
     			}
     			break;
     		case R.id.connect:
-    			_tv.setText("hoge");
-    	    	
+    			_tv.setText("connecting...");
     	    	Log.d(TAG, "before connect : " + _macAddress);
     	    	_reader.disconnect();
     	    	if (_reader.connect(_macAddress)) {
@@ -158,6 +153,16 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				_tv.setText("disconnect failed");
     			}
     			break;
+    		case R.id.decrease:
+    			_reader.setRadioPower(30);
+    			Log.d(TAG, "decrease");
+    		case R.id.read:
+    			if (_reader.isConnect()) {
+    				_reader.readTag(_param, true, EnMaskFlag.None, 3);
+    				Log.d(TAG, "read");
+    			} else {
+    				Log.d(TAG, "can't read");
+    			}
     	}
     }
     
@@ -186,7 +191,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		_param.setWordOffset(1);
 		_param.setWordCount(1);
 		_param.setPassword(0);
-		_reader.readTag(_param, false, EnMaskFlag.None, 0);
+		_reader.readTag(_param, true, EnMaskFlag.None, 3);
 	}
 
 	@Override

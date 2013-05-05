@@ -9,5 +9,7 @@
     <string name="send">Send</string>
     <string name="disconnect">Disconnect</string>
     <string name="connect">Connect</string>
+    <string name="decrease">Decrease</string>
+    <string name="read">Read</string>
 
 </resources>
