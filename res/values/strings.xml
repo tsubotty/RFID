@@ -18,5 +18,6 @@
     <string name="elab">Elab</string>
     <string name="condition">Condition</string>
     <string name="timer">Timer</string>
+    <string name="loop">Loop</string>
 
 </resources>

@@ -1,6 +1,8 @@
 package com.example.rfid;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 //import java.util.HashMap;
 //import java.util.List;
 //import java.util.Map;
@@ -10,8 +12,10 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -47,6 +51,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private TagAccessParameter _param = new TagAccessParameter();
 	private SendTimer _timer;
 	
+	private static final int MENU_TAG_LIST = Menu.FIRST;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +71,21 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        //getMenuInflater().inflate(R.menu.main, menu);
+    	super.onCreateOptionsMenu(menu);
+    	menu.add(0, MENU_TAG_LIST, 0, "Tag List");
         return true;
+    }
+    
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case MENU_TAG_LIST:
+            Log.d("Menu","Select Menu tag list");
+            Intent intent = new Intent(MainActivity.this, TagListActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return false;
     }
     
     private void configureButtons() {
@@ -77,6 +95,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	Button decBtn = (Button)findViewById(R.id.decrease);
     	Button sendBtn = (Button)findViewById(R.id.send);
     	Button timerBtn = (Button)findViewById(R.id.timer);
+    	Button loopBtn = (Button)findViewById(R.id.loop);
     	
     	connectBtn.setOnClickListener(this);
     	disconBtn.setOnClickListener(this);
@@ -84,15 +103,18 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	decBtn.setOnClickListener(this);
     	sendBtn.setOnClickListener(this);
     	timerBtn.setOnClickListener(this);
+    	loopBtn.setOnClickListener(this);
     	
+    	/* server_radio_button */
     	RadioGroup server_radioGroup = (RadioGroup) findViewById(R.id.server_radiogroup);
+    	server_radioGroup.check(R.id.tsubo_server);
         server_radioGroup.setOnCheckedChangeListener(this);
-        server_radioGroup.check(R.id.tsubo_server);
         RadioButton serverButton = (RadioButton) findViewById(R.id.tsubo_server);
         _server = (String) serverButton.getText();
+        /* place_radio_button */
         RadioGroup place_radioGroup = (RadioGroup) findViewById(R.id.place_radiogroup);
-        place_radioGroup.setOnCheckedChangeListener(this);
         place_radioGroup.check(R.id.elab);
+        place_radioGroup.setOnCheckedChangeListener(this);
         RadioButton placeButton = (RadioButton) findViewById(R.id.elab);
         _place = (String) placeButton.getText();
     	
@@ -210,6 +232,17 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     		case R.id.timer:
     			_timer = new SendTimer(this, this);
     			_timer.execute("timer");
+    			break;
+    		case R.id.loop:
+    			Log.d(TAG, "loop");
+    			
+    			// 3秒ごとにタグ読み取り
+    			Timer mTimer = new Timer(true);
+    			mTimer.schedule(new TimerTask() {
+    				public void run() {
+        				_reader.inventoryTag(false, EnMaskFlag.None, 1000);
+    				}
+    			}, 1000, 3000);
     			break;
     	}
     }
