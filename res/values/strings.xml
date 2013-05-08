@@ -16,5 +16,6 @@
     <string name="server">Server</string>
     <string name="equipment">Equipment</string>
     <string name="elab">Elab</string>
+    <string name="condition">Condition</string>
 
 </resources>

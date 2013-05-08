@@ -37,7 +37,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private TextView _tv;
 	private Handler _handler; // For UI control
 	private String _epc; // EPC Tag Name which are read from the reader
-	private ArrayList<Map<String, String>> _tagIDs;
+	//private ArrayList<Map<String, String>> _tagIDs;
+	private MyItem _myItem = new MyItem();
 	//private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
 	//private String _url = "http://133.11.236.196:8080/api/update";
 	private String _server;
@@ -52,9 +53,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         _reader = new DOTR_Util();
+    	_reader.setOnDotrEventListener(this);
         _handler = new Handler();
-		_tv = (TextView)findViewById(R.id.textView1);
-		_tagIDs = new ArrayList<Map<String, String>>();
+		_tv = (TextView)findViewById(R.id.condition);
+		//_tagIDs = new ArrayList<Map<String, String>>();
+		_myItem.list = new ArrayList<Row>();
         checkBluetooth();
         configureButtons();
     }
@@ -69,18 +72,26 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     private void configureButtons() {
     	Button connectBtn = (Button)findViewById(R.id.connect);
     	Button disconBtn = (Button)findViewById(R.id.disconnect);
-    	Button getBtn = (Button)findViewById(R.id.send);
+    	Button readBtn = (Button)findViewById(R.id.read);
     	Button decBtn = (Button)findViewById(R.id.decrease);
+    	Button sendBtn = (Button)findViewById(R.id.send);
+
     	connectBtn.setOnClickListener(this);
     	disconBtn.setOnClickListener(this);
-    	getBtn.setOnClickListener(this);
+    	readBtn.setOnClickListener(this);
     	decBtn.setOnClickListener(this);
-    	_reader.setOnDotrEventListener(this);
+    	sendBtn.setOnClickListener(this);
     	
     	RadioGroup server_radioGroup = (RadioGroup) findViewById(R.id.server_radiogroup);
         server_radioGroup.setOnCheckedChangeListener(this);
+        server_radioGroup.check(R.id.tsubo_server);
+        RadioButton serverButton = (RadioButton) findViewById(R.id.tsubo_server);
+        _server = (String) serverButton.getText();
         RadioGroup place_radioGroup = (RadioGroup) findViewById(R.id.place_radiogroup);
         place_radioGroup.setOnCheckedChangeListener(this);
+        place_radioGroup.check(R.id.elab);
+        RadioButton placeButton = (RadioButton) findViewById(R.id.elab);
+        _place = (String) placeButton.getText();
     	
     }
     
@@ -134,23 +145,19 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				_hph = new MyHttpPostHandler();
     			}
 				_hpt = new HttpPostTask(this, _server, _hph);
-    			MyItem mi = new MyItem();
-    			mi.list = new ArrayList<Row>();
     			Row row = new Row();
     			row.tag_id = "aaaaaa";
     			row.place = "todai";
-    			mi.list.add(row);
-    			Map map = new HashMap();
-    			map.put("tag_id", "bbbbbbbb");
-    			map.put("place", "elab");
-    			_tagIDs.add(map);
+    			_myItem.list.add(row);
+    			/*
     			for (Map<String, String> m : _tagIDs) {
     				row = new Row();
     				row.tag_id = m.get("tag_id");
     				row.place = m.get("place");
     				mi.list.add(row);
     			}
-    			String jsonString = new Gson().toJson(mi.list, ArrayList.class);
+    			*/
+    			String jsonString = new Gson().toJson(_myItem.list, ArrayList.class);
     			Log.d(TAG, "jsonString   " + jsonString);
     			_hpt.addPostParam("body", jsonString);
     			_hpt.execute();
@@ -184,25 +191,24 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     		case R.id.decrease:
     			_reader.setRadioPower(30);
     			Log.d(TAG, "decrease");
+    			break;
     		case R.id.read:
+    			Log.d(TAG, "read button pushed");
     			if (_reader.isConnect()) {
-    				_reader.readTag(_param, true, EnMaskFlag.None, 3);
+    				//_reader.readTag(_param, true, EnMaskFlag.None, 3);
+    				_reader.inventoryTag(false, EnMaskFlag.None, 1000);
     				Log.d(TAG, "read");
     			} else {
     				Log.d(TAG, "can't read");
     			}
+    			break;
     	}
     }
     
     @Override
     public void onReadTagData(String data, String epc) {
+    	Log.d(TAG, "In onReadTagData");
     	_epc = data + " : " + epc;
-    	Map map = new HashMap();
-    	map.put("tag_id", epc);
-    	map.put("place", "elab");
-    	_tagIDs. add(map);
-    	//_tagIDs.add("Number " + _tagIDs.size() + " : " + data + " : " + epc);
-    	Log.d(TAG, "RTD" + _tagIDs.size());
     	_handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -211,6 +217,22 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 			}
 		});
     }
+    
+	@Override
+	public void onInventoryEPC(String epc) {
+		_epc = epc;
+		Row row = new Row();
+		row.tag_id = epc;
+		row.place = _place;
+		_myItem.list.add(row);
+		_handler.post(new Runnable() {
+			@Override
+			public void run() {
+				_tv.setText(_epc);
+	    		Log.d(TAG, _epc);
+			}
+		});
+	}
 
 	@Override
 	public void onConnected() {
@@ -219,23 +241,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		_param.setWordOffset(1);
 		_param.setWordCount(1);
 		_param.setPassword(0);
-		_reader.readTag(_param, true, EnMaskFlag.None, 3);
+		//_reader.readTag(_param, true, EnMaskFlag.None, 3);
 	}
 
 	@Override
 	public void onDisconnected() {		
-	}
-
-	@Override
-	public void onInventoryEPC(String epc) {
-		_epc = epc;
-		_handler.post(new Runnable() {
-			@Override
-			public void run() {
-				_tv.setText(_epc);
-	    		Log.d(TAG, _epc);
-			}
-		});
 	}
 
 	@Override
