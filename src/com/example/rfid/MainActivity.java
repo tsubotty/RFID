@@ -1,9 +1,9 @@
 package com.example.rfid;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
 import java.util.Set;
 
 import android.os.Bundle;
@@ -25,7 +25,7 @@ import android.widget.RadioGroup;
 import jp.co.tss21.uhfrfid.dotr_android.*;
 
 //import net.sf.json.JSONObject;
-import net.arnx.jsonic.JSON;
+//import net.arnx.jsonic.JSON;
 import com.google.gson.Gson;
 
 public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener, OnCheckedChangeListener{
@@ -39,13 +39,12 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private String _epc; // EPC Tag Name which are read from the reader
 	//private ArrayList<Map<String, String>> _tagIDs;
 	private MyItem _myItem = new MyItem();
-	//private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
-	//private String _url = "http://133.11.236.196:8080/api/update";
 	private String _server;
 	private String _place;
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
 	private TagAccessParameter _param = new TagAccessParameter();
+	private SendTimer _timer;
 	
 	
     @Override
@@ -75,12 +74,14 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	Button readBtn = (Button)findViewById(R.id.read);
     	Button decBtn = (Button)findViewById(R.id.decrease);
     	Button sendBtn = (Button)findViewById(R.id.send);
-
+    	Button timerBtn = (Button)findViewById(R.id.timer);
+    	
     	connectBtn.setOnClickListener(this);
     	disconBtn.setOnClickListener(this);
     	readBtn.setOnClickListener(this);
     	decBtn.setOnClickListener(this);
     	sendBtn.setOnClickListener(this);
+    	timerBtn.setOnClickListener(this);
     	
     	RadioGroup server_radioGroup = (RadioGroup) findViewById(R.id.server_radiogroup);
         server_radioGroup.setOnCheckedChangeListener(this);
@@ -202,6 +203,10 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				Log.d(TAG, "can't read");
     			}
     			break;
+    		case R.id.timer:
+    			_timer = new SendTimer(this);
+    			_timer.execute("timer");
+    			break;
     	}
     }
     
@@ -228,8 +233,17 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		_handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_tv.setText(_epc);
-	    		Log.d(TAG, _epc);
+				_tv.setText("TagCount: " + _myItem.list.size());
+	    		Log.d(TAG, "" + _myItem.list.size());
+	    		if (_timer == null) {
+	    			_timer = new SendTimer(MainActivity.this);
+		    		_timer.execute("hoge");
+	    		} else {
+	    			_timer.cancel(true);
+	    			_timer = new SendTimer(MainActivity.this);
+	    			_timer.execute("hoge");
+	    		}
+	    		
 			}
 		});
 	}

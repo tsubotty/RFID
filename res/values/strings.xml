@@ -17,5 +17,6 @@
     <string name="equipment">Equipment</string>
     <string name="elab">Elab</string>
     <string name="condition">Condition</string>
+    <string name="timer">Timer</string>
 
 </resources>
