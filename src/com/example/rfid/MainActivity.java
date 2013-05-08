@@ -15,8 +15,12 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.os.Handler;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import jp.co.tss21.uhfrfid.dotr_android.*;
 
@@ -24,7 +28,7 @@ import jp.co.tss21.uhfrfid.dotr_android.*;
 import net.arnx.jsonic.JSON;
 import com.google.gson.Gson;
 
-public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener{
+public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener, OnCheckedChangeListener{
 	
 	private DOTR_Util _reader;
 	private String _macAddress;   //= "00:18:9A:05:9C:62";
@@ -34,8 +38,10 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private Handler _handler; // For UI control
 	private String _epc; // EPC Tag Name which are read from the reader
 	private ArrayList<Map<String, String>> _tagIDs;
-	private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
+	//private String _url = "http://www.hongo.wide.ad.jp/~tsubo/index.php";
 	//private String _url = "http://133.11.236.196:8080/api/update";
+	private String _server;
+	private String _place;
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
 	private TagAccessParameter _param = new TagAccessParameter();
@@ -70,6 +76,12 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	getBtn.setOnClickListener(this);
     	decBtn.setOnClickListener(this);
     	_reader.setOnDotrEventListener(this);
+    	
+    	RadioGroup server_radioGroup = (RadioGroup) findViewById(R.id.server_radiogroup);
+        server_radioGroup.setOnCheckedChangeListener(this);
+        RadioGroup place_radioGroup = (RadioGroup) findViewById(R.id.place_radiogroup);
+        place_radioGroup.setOnCheckedChangeListener(this);
+    	
     }
     
     private void checkBluetooth() {
@@ -93,10 +105,26 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
             }
         } else {
             finish();
-        }
-        
-
+        }    
     }
+    
+	@Override
+	public void onCheckedChanged(RadioGroup group, int checkedId) {
+		RadioButton radioButton = (RadioButton) findViewById(checkedId);
+	    Toast.makeText(MainActivity.this,
+                "onCheckedChanged():" + radioButton.getText(),
+                Toast.LENGTH_SHORT).show();
+		switch (group.getId()) {
+		case R.id.server_radiogroup:
+			_server = (String) radioButton.getText();
+			Log.d(TAG, _server);
+			break;
+		case R.id.place_radiogroup:
+			_place = (String) radioButton.getText();
+			Log.d(TAG, _place);
+			break;
+		}            
+	}
     
     @Override
     public void onClick(View v) {
@@ -105,7 +133,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			if (_hpt == null) {
     				_hph = new MyHttpPostHandler();
     			}
-				_hpt = new HttpPostTask(this, _url, _hph);
+				_hpt = new HttpPostTask(this, _server, _hph);
     			MyItem mi = new MyItem();
     			mi.list = new ArrayList<Row>();
     			Row row = new Row();
@@ -248,6 +276,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		String tag_id;
 		String place;
 	}
+
 	
     
 }

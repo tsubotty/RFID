@@ -11,5 +11,10 @@
     <string name="connect">Connect</string>
     <string name="decrease">Decrease</string>
     <string name="read">Read</string>
+    <string name="tsubo">http://www.hongo.wide.ad.jp/~tsubo/index.php</string>
+    <string name="tkk">http://133.11.236.196:8080/api/update</string>
+    <string name="server">Server</string>
+    <string name="equipment">Equipment</string>
+    <string name="elab">Elab</string>
 
 </resources>
