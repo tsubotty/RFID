@@ -38,8 +38,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private Handler _handler; // For UI control
 	private String _epc; // EPC Tag Name which are read from the reader
 	//private ArrayList<Map<String, String>> _tagIDs;
-	private MyItem _myItem = new MyItem();
-	private String _server;
+	//private MyItem _myItem = new MyItem();
+	public ArrayList<Row> _list;
+	public String _server;
 	private String _place;
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
@@ -56,7 +57,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         _handler = new Handler();
 		_tv = (TextView)findViewById(R.id.condition);
 		//_tagIDs = new ArrayList<Map<String, String>>();
-		_myItem.list = new ArrayList<Row>();
+		//_myItem.list = new ArrayList<Row>();
+		_list = new ArrayList<Row>();
         checkBluetooth();
         configureButtons();
     }
@@ -143,13 +145,14 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	switch(v.getId()) {
     		case R.id.send:
     			if (_hpt == null) {
-    				_hph = new MyHttpPostHandler();
+    				_hph = new MyHttpPostHandler(this);
     			}
 				_hpt = new HttpPostTask(this, _server, _hph);
     			Row row = new Row();
     			row.tag_id = "aaaaaa";
     			row.place = "todai";
-    			_myItem.list.add(row);
+    			//_myItem.list.add(row);
+    			_list.add(row);
     			/*
     			for (Map<String, String> m : _tagIDs) {
     				row = new Row();
@@ -158,7 +161,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				mi.list.add(row);
     			}
     			*/
-    			String jsonString = new Gson().toJson(_myItem.list, ArrayList.class);
+    			//String jsonString = new Gson().toJson(_myItem.list, ArrayList.class);
+    			String jsonString = new Gson().toJson(_list, ArrayList.class);
     			Log.d(TAG, "jsonString   " + jsonString);
     			_hpt.addPostParam("body", jsonString);
     			_hpt.execute();
@@ -204,7 +208,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			}
     			break;
     		case R.id.timer:
-    			_timer = new SendTimer(this);
+    			_timer = new SendTimer(this, this);
     			_timer.execute("timer");
     			break;
     	}
@@ -229,18 +233,20 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		Row row = new Row();
 		row.tag_id = epc;
 		row.place = _place;
-		_myItem.list.add(row);
+		//_myItem.list.add(row);
+		_list.add(row);
 		_handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_tv.setText("TagCount: " + _myItem.list.size());
-	    		Log.d(TAG, "" + _myItem.list.size());
+				_tv.setText("TagCount: " + _list.size());
+	    		Log.d(TAG, "" + _list.size());
 	    		if (_timer == null) {
-	    			_timer = new SendTimer(MainActivity.this);
+	    			_timer = new SendTimer(MainActivity.this, MainActivity.this);
 		    		_timer.execute("hoge");
 	    		} else {
 	    			_timer.cancel(true);
-	    			_timer = new SendTimer(MainActivity.this);
+	    			_timer = null;
+	    			_timer = new SendTimer(MainActivity.this, MainActivity.this);
 	    			_timer.execute("hoge");
 	    		}
 	    		
@@ -295,12 +301,5 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		//List<Row> list;
 		ArrayList<Row> list;
 		
-	}
-	public class Row {
-		String tag_id;
-		String place;
-	}
-
-	
-    
+	}    
 }

@@ -1,11 +1,21 @@
 package com.example.rfid;
 
+import java.util.ArrayList;
+
 public class MyHttpPostHandler extends HttpPostHandler {
 	public String _response;
 	public String _pro = "hoge";
+	public MainActivity _activity;
+	
+	public MyHttpPostHandler(MainActivity activity) {
+		_activity = activity;
+	}
+	
 	@Override
 	public void onPostCompleted(String response) {
 		this._response = response;
+		_activity._list = null; // Reset tag list
+		_activity._list = new ArrayList<Row>();
 	}
 
 	@Override
