@@ -22,5 +22,8 @@
     <string name="tag_id">TagID</string>
     <string name="register">Register</string>
     <string name="publish">Publish new ID</string>
+    <string name="err_msg">ErrorMessage</string>
+    <string name="tkk_new">http://133.11.266.196:8080/api/new</string>
+    <string name="tsubo_new">http://www.hongo.wide.ad.jp/~tsubo/new.php</string>
 
 </resources>

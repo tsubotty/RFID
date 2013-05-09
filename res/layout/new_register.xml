@@ -25,6 +25,30 @@
           android:text="">
         </TextView>
     </LinearLayout>
+    <!-- Server -->
+    <LinearLayout 
+        android:id="@+id/Row5"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp">
+        <TextView android:id="@+id/server"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/server">
+        </TextView>
+        <RadioGroup android:id="@+id/server_radiogroup"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <RadioButton android:id="@+id/tsubo_new"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tsubo_new" />
+            <RadioButton android:id="@+id/tkk_new"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tkk_new" />
+        </RadioGroup>
+    </LinearLayout>
     <!-- Publish new ID -->
     <LinearLayout 
         android:id="@+id/Row2"
@@ -52,6 +76,34 @@
             android:layout_height="wrap_content"
             android:text="@string/register" >
         </Button>
+    </LinearLayout>
+    <LinearLayout 
+        android:id="@+id/Row4"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/err_msg"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:text="@string/err_msg" 
+            android:textSize="20sp">
+        </TextView>
+    </LinearLayout>
+     <LinearLayout 
+        android:id="@+id/Row5"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/err_msg_blank"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:text="" 
+            android:textSize="20sp">
+        </TextView>
     </LinearLayout>
     
 </LinearLayout>

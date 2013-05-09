@@ -6,4 +6,6 @@ import android.app.Application;
 
 public class Globals extends Application {
 	public ArrayList<Row> list = new ArrayList<Row>();
+	
+	//ary = Constants.getInstance().getArray(); ƒVƒ“ƒOƒ‹ƒgƒ“
 }

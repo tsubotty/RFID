@@ -23,6 +23,7 @@ public class TagListActivity extends Activity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         // ƒAƒCƒeƒ€‚ð’Ç‰Á‚µ‚Ü‚·
+        globals = (Globals) this.getApplication();
         for(Row row :this.globals.list) {
         	adapter.add(row.tag_id);
         }
