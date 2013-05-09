@@ -81,8 +81,8 @@ public class SendTimer extends AsyncTask<String, Integer, Long> implements OnCan
 		_hph = new MyHttpPostHandler(this._activity);
 	}
 	_hpt = new HttpPostTask(this._activity, _activity._server, _hph);
-	String jsonString = new Gson().toJson(_activity._list, ArrayList.class);
-	Log.d(TAG, "Count: " + _activity._list.size() + "  jsonString: " + jsonString);
+	String jsonString = new Gson().toJson(_activity._globals.list, ArrayList.class);
+	Log.d(TAG, "Count: " + _activity._globals.list.size() + "  jsonString: " + jsonString);
 	_hpt.addPostParam("body", jsonString);
 	_hpt.execute();
   }

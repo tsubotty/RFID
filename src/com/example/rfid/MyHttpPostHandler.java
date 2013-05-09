@@ -6,6 +6,7 @@ public class MyHttpPostHandler extends HttpPostHandler {
 	public String _response;
 	public String _pro = "hoge";
 	public MainActivity _activity;
+	public Globals globals;
 	
 	public MyHttpPostHandler(MainActivity activity) {
 		_activity = activity;
@@ -14,8 +15,8 @@ public class MyHttpPostHandler extends HttpPostHandler {
 	@Override
 	public void onPostCompleted(String response) {
 		this._response = response;
-		_activity._list = null; // Reset tag list
-		_activity._list = new ArrayList<Row>();
+		_activity._globals.list = null; // Reset tag list
+		_activity._globals.list = new ArrayList<Row>();
 	}
 
 	@Override

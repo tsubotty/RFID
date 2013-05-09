@@ -43,15 +43,17 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private String _epc; // EPC Tag Name which are read from the reader
 	//private ArrayList<Map<String, String>> _tagIDs;
 	//private MyItem _myItem = new MyItem();
-	public ArrayList<Row> _list;
+	//public ArrayList<Row> _list;
 	public String _server;
 	private String _place;
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
 	private TagAccessParameter _param = new TagAccessParameter();
 	private SendTimer _timer;
+	public Globals _globals = (Globals) this.getApplication(); 
 	
 	private static final int MENU_TAG_LIST = Menu.FIRST;
+	private static final int MENU_NEW_REGISTER = Menu.FIRST + 1;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +65,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		_tv = (TextView)findViewById(R.id.condition);
 		//_tagIDs = new ArrayList<Map<String, String>>();
 		//_myItem.list = new ArrayList<Row>();
-		_list = new ArrayList<Row>();
+		//_globals.list = new ArrayList<Row>();
         checkBluetooth();
         configureButtons();
     }
@@ -74,16 +76,21 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         //getMenuInflater().inflate(R.menu.main, menu);
     	super.onCreateOptionsMenu(menu);
     	menu.add(0, MENU_TAG_LIST, 0, "Tag List");
+    	menu.add(0, MENU_NEW_REGISTER, 0, "New Register");    	
         return true;
     }
     
     public boolean onOptionsItemSelected(MenuItem item) {
+    	Intent intent;
         switch (item.getItemId()) {
         case MENU_TAG_LIST:
             Log.d("Menu","Select Menu tag list");
-            Intent intent = new Intent(MainActivity.this, TagListActivity.class);
+            intent = new Intent(MainActivity.this, TagListActivity.class);
             startActivity(intent);
             return true;
+        case MENU_NEW_REGISTER:
+        	intent = new Intent(MainActivity.this, NewRegisterActivity.class);
+            startActivity(intent);
         }
         return false;
     }
@@ -166,7 +173,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     public void onClick(View v) {
     	switch(v.getId()) {
     		case R.id.send:
-    			if (_hpt == null) {
+    			if (_hph == null) {
     				_hph = new MyHttpPostHandler(this);
     			}
 				_hpt = new HttpPostTask(this, _server, _hph);
@@ -174,7 +181,14 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			row.tag_id = "aaaaaa";
     			row.place = "todai";
     			//_myItem.list.add(row);
-    			_list.add(row);
+    			if (_globals == null) {
+    				Log.d(TAG, "_globals null");
+    				_globals = (Globals) this.getApplication(); 
+    			}
+    			if (_globals.list == null) {
+    				Log.d(TAG, "list null");
+    			}
+    			_globals.list.add(row);
     			/*
     			for (Map<String, String> m : _tagIDs) {
     				row = new Row();
@@ -184,7 +198,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			}
     			*/
     			//String jsonString = new Gson().toJson(_myItem.list, ArrayList.class);
-    			String jsonString = new Gson().toJson(_list, ArrayList.class);
+    			String jsonString = new Gson().toJson(_globals.list, ArrayList.class);
     			Log.d(TAG, "jsonString   " + jsonString);
     			_hpt.addPostParam("body", jsonString);
     			_hpt.execute();
@@ -267,12 +281,12 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		row.tag_id = epc;
 		row.place = _place;
 		//_myItem.list.add(row);
-		_list.add(row);
+		_globals.list.add(row);
 		_handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_tv.setText("TagCount: " + _list.size());
-	    		Log.d(TAG, "" + _list.size());
+				_tv.setText("TagCount: " + _globals.list.size());
+	    		Log.d(TAG, "" + _globals.list.size());
 	    		if (_timer == null) {
 	    			_timer = new SendTimer(MainActivity.this, MainActivity.this);
 		    		_timer.execute("hoge");
