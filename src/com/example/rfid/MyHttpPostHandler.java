@@ -15,8 +15,8 @@ public class MyHttpPostHandler extends HttpPostHandler {
 	@Override
 	public void onPostCompleted(String response) {
 		this._response = response;
-		_activity._globals.list = null; // Reset tag list
-		_activity._globals.list = new ArrayList<Row>();
+		_activity.globals.list = null; // Reset tag list
+		_activity.globals.list = new ArrayList<Row>();
 	}
 
 	@Override

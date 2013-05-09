@@ -92,7 +92,7 @@
         </TextView>
     </LinearLayout>
      <LinearLayout 
-        android:id="@+id/Row5"
+       	android:id="@+id/Row6"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
         android:baselineAligned="true"

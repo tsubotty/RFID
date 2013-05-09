@@ -32,16 +32,18 @@
         <activity
             android:name="com.example.rfid.TagListActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            >
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.example.rfid.NewRegisterActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            >
+            android:screenOrientation="portrait">
         </activity>
-            
+        <activity
+            android:name="com.example.rfid.ConfigActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 	
 </manifest>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/outer"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:baselineAligned="true"
+    android:orientation="vertical">
+    <LinearLayout 
+        android:id="@+id/volume"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:gravity="center"
+        android:layout_height="150dp">
+        <TextView android:id="@+id/server"
+          android:layout_width="wrap_content"
+          android:layout_height="30dp"
+          android:text="@string/volume">
+        </TextView>
+            <RadioGroup android:id="@+id/volume_group"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <RadioButton android:id="@+id/mute"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mute" />
+                <RadioButton android:id="@+id/low"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/low" />
+                <RadioButton android:id="@+id/high"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/high" />
+            </RadioGroup>
+           <Button
+            	android:id="@+id/volume_change"
+            	android:layout_width="156dp"
+            	android:layout_height="wrap_content"
+            	android:text="VolumeChange" >
+           </Button>
+      </LinearLayout>
+      <LinearLayout 
+        android:id="@+id/radio_power_linear"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:gravity="center"
+        android:layout_height="150dp">
+      <TextView android:id="@+id/radio_power"
+          android:layout_width="wrap_content"
+          android:layout_height="30dp"
+          android:text="RadioPower">
+      </TextView>
+      <RadioGroup android:id="@+id/radio_power_group"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <RadioButton android:id="@+id/two"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="1/2" />
+                <RadioButton android:id="@+id/four"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="1/4" />
+                <RadioButton android:id="@+id/eight"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="1/8" />
+       </RadioGroup>     
+       <Button
+            	android:id="@+id/decrease"
+            	android:layout_width="156dp"
+            	android:layout_height="wrap_content"
+            	android:text="@string/decrease" >
+       </Button>
+       </LinearLayout>
+       <LinearLayout 
+        android:id="@+id/debug_area"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:gravity="center"
+        android:layout_height="150dp">
+      <TextView android:id="@+id/debug"
+          android:layout_width="wrap_content"
+          android:layout_height="30dp"
+          android:text="">
+      </TextView>
+      </LinearLayout>
+      
+</LinearLayout>

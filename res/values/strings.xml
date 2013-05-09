@@ -12,7 +12,7 @@
     <string name="decrease">Decrease</string>
     <string name="read">Read</string>
     <string name="tsubo">http://www.hongo.wide.ad.jp/~tsubo/index.php</string>
-    <string name="tkk">http://133.11.236.196:8080/api/update</string>
+    <string name="tkk">http://133.11.236.196:8080/api/data_reg</string>
     <string name="server">Server</string>
     <string name="equipment">Equipment</string>
     <string name="elab">Elab</string>
@@ -25,5 +25,9 @@
     <string name="err_msg">ErrorMessage</string>
     <string name="tkk_new">http://133.11.266.196:8080/api/new</string>
     <string name="tsubo_new">http://www.hongo.wide.ad.jp/~tsubo/new.php</string>
+    <string name="low">Low</string>
+    <string name="mute">Mute</string>
+    <string name="high">High</string>
+    <string name="volume">Volume</string>
 
 </resources>
