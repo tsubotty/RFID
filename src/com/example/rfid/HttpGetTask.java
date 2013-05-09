@@ -28,14 +28,16 @@ public class HttpGetTask {
             httpclient = new DefaultHttpClient();
             targetHost = new HttpHost(host, 80, PROTO);
             String getUrl = url;
-            getUrl += "?";
-            boolean trimFlag = false;
-            for (Map.Entry<String, String> e : map.entrySet()) {
-            	getUrl = getUrl + e.getKey() + "=" + e.getValue() + "&";
-            	trimFlag = true;
-            }
-            if (trimFlag) {
-            	getUrl = getUrl.substring(0, getUrl.length() - 2); // Trim '&' at end of getUrl;
+            if (map != null) {
+	            getUrl += "?";
+	            boolean trimFlag = false;
+	            for (Map.Entry<String, String> e : map.entrySet()) {
+	            	getUrl = getUrl + e.getKey() + "=" + e.getValue() + "&";
+	            	trimFlag = true;
+	            }
+	            if (trimFlag) {
+	            	getUrl = getUrl.substring(0, getUrl.length() - 2); // Trim '&' at end of getUrl;
+	            }
             }
             HttpGet httpget = new HttpGet(getUrl);
             HttpResponse response = httpclient.execute(targetHost, httpget);

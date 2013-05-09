@@ -63,9 +63,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	_reader.setOnDotrEventListener(this);
         _handler = new Handler();
 		_tv = (TextView)findViewById(R.id.condition);
-		//_tagIDs = new ArrayList<Map<String, String>>();
-		//_myItem.list = new ArrayList<Row>();
-		//_globals.list = new ArrayList<Row>();
+		_globals = (Globals) this.getApplication();
         checkBluetooth();
         configureButtons();
     }
@@ -189,14 +187,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				Log.d(TAG, "list null");
     			}
     			_globals.list.add(row);
-    			/*
-    			for (Map<String, String> m : _tagIDs) {
-    				row = new Row();
-    				row.tag_id = m.get("tag_id");
-    				row.place = m.get("place");
-    				mi.list.add(row);
-    			}
-    			*/
     			//String jsonString = new Gson().toJson(_myItem.list, ArrayList.class);
     			String jsonString = new Gson().toJson(_globals.list, ArrayList.class);
     			Log.d(TAG, "jsonString   " + jsonString);

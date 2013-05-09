@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/outer"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:baselineAligned="true"
+    android:orientation="vertical">
+    <LinearLayout 
+        android:id="@+id/Row1"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <TextView android:id="@+id/tag_id"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="20sp"
+          android:gravity="center_horizontal"
+          android:text="@string/tag_id">
+        </TextView>
+         <TextView android:id="@+id/tag_id_blank"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="20sp"
+          android:text="">
+        </TextView>
+    </LinearLayout>
+    <!-- Publish new ID -->
+    <LinearLayout 
+        android:id="@+id/Row2"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/publish"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:text="@string/publish" >
+        </Button>
+    </LinearLayout>
+    <!-- Register -->
+    <LinearLayout 
+        android:id="@+id/Row3"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/register"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:text="@string/register" >
+        </Button>
+    </LinearLayout>
+    
+</LinearLayout>
