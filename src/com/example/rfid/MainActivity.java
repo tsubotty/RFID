@@ -3,18 +3,11 @@ package com.example.rfid;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-import java.util.Set;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -38,23 +31,16 @@ import com.google.gson.Gson;
 
 public class MainActivity extends Activity implements OnClickListener, OnDotrEventListener, OnCheckedChangeListener {
 	
-	//protected DOTR_Util globals.reader = new DOTR_Util();
-	//protected String _macAddress;   //= "00:18:9A:05:9C:62";
-	private BluetoothAdapter _bt = BluetoothAdapter.getDefaultAdapter();
 	private static final String TAG = MainActivity.class.getSimpleName(); // Name of this class 
-	private TextView _tv;
+	protected TextView tv;
 	private Handler handler; // For UI control
-	private String _epc; // EPC Tag Name which are read from the reader
-	//private ArrayList<Map<String, String>> _tagIDs;
-	//private MyItem _myItem = new MyItem();
-	//public ArrayList<Row> _list;
+	private String epc; // EPC Tag Name which are read from the reader
 	public String server;
 	private String _place;
 	private HttpPostTask _hpt = null;
 	private MyHttpPostHandler _hph = null;
-	private TagAccessParameter _param = new TagAccessParameter();
 	private SendTimer _timer;
-	public Globals globals = (Globals) this.getApplication(); 
+	public Globals globals;
 	
 	private static final int MENU_TAG_LIST = Menu.FIRST;
 	private static final int MENU_NEW_REGISTER = Menu.FIRST + 1;
@@ -69,8 +55,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		globals = (Globals) this.getApplication();
     	globals.reader.setOnDotrEventListener(this);
         handler = new Handler();
-		_tv = (TextView)findViewById(R.id.condition);
-        checkBluetooth();
+		tv = (TextView)findViewById(R.id.condition);
+        globals.checkBluetooth(this);
         configureButtons();
     }
 
@@ -142,29 +128,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         _place = (String) placeButton.getText();
     }
     
-    protected void checkBluetooth() {
-    	if (!_bt.equals(null)) { //Bluetooth available
-            Log.d(TAG,"Bluetooth available");
-        } else { //not available
-            Log.d(TAG,"Bluetooth not available");
-            finish();
-        }
-        boolean btEnable = _bt.isEnabled();
-        if (btEnable == true) { //case of bluetooth enable 
-            Set<BluetoothDevice> pairedDevices = _bt.getBondedDevices();
-            if(pairedDevices.size() > 0){
-                //There are devices which had connected before.
-                for(BluetoothDevice device:pairedDevices){
-                    //getName() -> device name
-                    //getAddress -> MAC address
-                    Log.d(TAG, device.getName() + "\n" + device.getAddress());
-                    globals.macAddress = device.getAddress();
-                }
-            }
-        } else {
-            finish();
-        }    
-    }
+
     
 	@Override
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -208,33 +172,33 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			_hpt.addPostParam("body", jsonString);
     			_hpt.execute();
     			try {
-    				_tv.setText(_hph._response);
+    				tv.setText(_hph._response);
     				Log.d(TAG, _hph._response);
     			} catch (Exception e) {
     				Log.d(TAG, e.getMessage());
     			}
     			break;
     		case R.id.connect:
-    			//asyncConnect();
-    			
-    			_tv.setText("connecting...");
+    			asyncConnect();
+    			/*
+    			tv.setText("connecting...");
     	    	Log.d(TAG, "before connect : " + globals.macAddress);
     	    	globals.reader.disconnect();
     	    	if (globals.reader.connect(globals.macAddress)) {
     	    		Log.d("RFID", "success");
-    	    		_tv.setText("success");
+    	    		tv.setText("success");
     	    	} else {
     	    		Log.d("RFID", "failed");
-    	    		_tv.setText("failed");
+    	    		tv.setText("failed");
     	    	}
-    	    	
-    	    	Log.d("RFID", "onClick");
+    	    	*/
+    	    	Log.d("RFID", "connect onClick");
     			break;
     		case R.id.disconnect:
     			if (globals.reader.disconnect()) {
-    				_tv.setText("disconnected");
+    				tv.setText("disconnected");
     			} else {
-    				_tv.setText("disconnect failed");
+    				tv.setText("disconnect failed");
     			}
     			break;
     		case R.id.decrease:
@@ -267,7 +231,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			break;
     	}
     }
-    /*
+    
     public void asyncConnect() {
     	AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
     		ProgressDialog dialog;
@@ -276,7 +240,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			 dialog = new ProgressDialog(context);
     			 dialog.setTitle("Please wait");
     			 dialog.setMessage("Loading data...");
-    			 dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
     			 dialog.setCancelable(true);
     			 dialog.show();
     		}
@@ -285,30 +248,33 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
    			 	globals.reader.connect(globals.macAddress);
     			return null;
     		}
-    		@Override
-    		protected void onPostExecute(Void... unused) {
-    			dialog.dismiss();
-    		}
+    		
+			@Override
+			protected void onPostExecute(Void result) {
+				dialog.dismiss();
+				tv.setText("Connect Success!");
+			}
+    		
     	};
     	task.execute(); // パラメータを渡す
     }
-    */
+    
     @Override
-    public void onReadTagData(String data, String epc) {
+    public void onReadTagData(String data, final String epc) {
     	Log.d(TAG, "In onReadTagData");
-    	_epc = data + " : " + epc;
+    	this.epc = data + " : " + epc;
     	handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_tv.setText(_epc);
-	    		Log.d(TAG, _epc);
+				tv.setText(epc);
+	    		Log.d(TAG, epc);
 			}
 		});
     }
     
 	@Override
 	public void onInventoryEPC(String epc) {
-		_epc = epc;
+		this.epc = epc;
 		Row row = new Row();
 		row.tag_id = epc;
 		row.place = _place;
@@ -316,7 +282,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				_tv.setText("TagCount: " + globals.list.size());
+				tv.setText("TagCount: " + globals.list.size());
 	    		Log.d(TAG, "" + globals.list.size());
 	    		if (_timer == null) {
 	    			_timer = new SendTimer(MainActivity.this, MainActivity.this);
@@ -334,12 +300,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 
 	@Override
 	public void onConnected() {
+		globals.setParams();
 		//globals.reader.inventoryTag(false, EnMaskFlag.None, 1000);
-		_param.setMemoryBank(EnMemoryBank.EPC);
-		_param.setWordOffset(1);
-		_param.setWordCount(1);
-		_param.setPassword(0);
-		//globals.reader.readTag(_param, true, EnMaskFlag.None, 3);
+		//globals.reader.readTag(globals.param, true, EnMaskFlag.None, 3);
 	}
 
 	@Override
@@ -373,10 +336,5 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 
 	@Override
 	public void onWriteTagData(String arg0) {
-	}
-	
-	public class MyItem {
-		//List<Row> list;
-		ArrayList<Row> list;
-	}    
+	}  
 }

@@ -3,7 +3,6 @@ package com.example.rfid;
 import java.util.HashMap;
 import java.util.Map;
 
-import jp.co.tss21.uhfrfid.dotr_android.DOTR_Util;
 import jp.co.tss21.uhfrfid.dotr_android.EnBuzzerVolume;
 import jp.co.tss21.uhfrfid.dotr_android.EnMaskFlag;
 import jp.co.tss21.uhfrfid.dotr_android.OnDotrEventListener;
@@ -26,16 +25,13 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 public class ConfigActivity extends MainActivity implements OnClickListener, OnDotrEventListener, OnCheckedChangeListener{
 	//private DOTR_Util reader;
 	private static final String TAG = ConfigActivity.class.getSimpleName(); // Name of this class 
-	//private EnBuzzerVolume volume;
-	private int decrease;
 	private Map<String, EnBuzzerVolume> volumeMap;
 	private Map<String, Integer> decMap; 
-	private String volume_string = "Mute";
+	private String volStr;
+	private String decStr;
 	private Globals globals;
-	private TextView debug;
 	private Handler handler = new Handler();
-	private String epc;
-	
+		
 	private static final int MENU_MAIN = Menu.FIRST;
 	private static final int MENU_TAG_LIST = Menu.FIRST + 1;
 	private static final int MENU_NEW_REGISTER = Menu.FIRST + 2;
@@ -46,7 +42,13 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
         setContentView(R.layout.config);
         globals = (Globals) this.getApplication();
         globals.reader.setOnDotrEventListener(this);
-        debug = (TextView) findViewById(R.id.debug);
+        tv = (TextView) findViewById(R.id.debug);
+        
+        configureMap();
+		configureButtons();
+		globals.checkBluetooth(this);
+    }
+	public void configureMap() {
     	volumeMap = new HashMap<String, EnBuzzerVolume>();
     	volumeMap.put("Mute", EnBuzzerVolume.Mute);
     	volumeMap.put("Low", EnBuzzerVolume.Mute);
@@ -55,17 +57,13 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
     	decMap.put("1/2", 3); 
     	decMap.put("1/4", 6); 
     	decMap.put("1/8", 9);
-		configureButtons();
-		checkBluetooth();
-    }
-	
+	}
 	@Override
 	 public boolean onCreateOptionsMenu(Menu menu) {
-	    	super.onCreateOptionsMenu(menu);
-	    	menu.add(0, MENU_MAIN, 0, "Main");
-	    	menu.add(0, MENU_TAG_LIST, 0, "Tag List");
-	    	menu.add(0, MENU_NEW_REGISTER, 0, "New Register");
-	        return true;
+		menu.add(0, MENU_MAIN, 0, "Main");
+		menu.add(0, MENU_TAG_LIST, 0, "Tag List");
+		menu.add(0, MENU_NEW_REGISTER, 0, "New Register");
+		return true;
 	}
 	
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -87,8 +85,7 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
         return false;
     }
 	
-	
-	 protected void configureButtons() {
+	protected void configureButtons() {
 	    Button volumeChangeBtn = (Button)findViewById(R.id.volume_change);
 	    Button decreaseBtn = (Button)findViewById(R.id.decrease);
 	    	
@@ -96,60 +93,63 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 	    decreaseBtn.setOnClickListener(this);
 	    	
 	    /* volume_change_radio_button */
-	    RadioGroup volume_group = (RadioGroup) findViewById(R.id.volume_group);
-	    volume_group.check(R.id.mute);
-	    volume_group.setOnCheckedChangeListener(this);
+	    RadioGroup volumeGroup = (RadioGroup) findViewById(R.id.volume_group);
+	    volumeGroup.check(R.id.mute);
+	    volumeGroup.setOnCheckedChangeListener(this);
+	    RadioButton volumeButton = (RadioButton) findViewById(volumeGroup.getCheckedRadioButtonId());
+	    volStr = (String) volumeButton.getText();
 	    //volume = decMap.get("1/4");
 	    /* radio_power_radio_button */
-	    RadioGroup power_group = (RadioGroup) findViewById(R.id.radio_power_group);
-	    power_group.check(R.id.four);
-	    power_group.setOnCheckedChangeListener(this);
-		decrease = decMap.get("1/4");
+	    RadioGroup powerGroup = (RadioGroup) findViewById(R.id.radio_power_group);
+	    powerGroup.check(R.id.four);
+	    powerGroup.setOnCheckedChangeListener(this);
+	    RadioButton powerButton = (RadioButton) findViewById(powerGroup.getCheckedRadioButtonId());
+	    decStr = (String) powerButton.getText();
 	 }
 
 	@Override
 	public void onClick(View v) {
-	// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+	// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		if (!globals.reader.isConnect()) {
 			if (globals.reader.connect(globals.macAddress)) {
 				Log.d(TAG, "connect success");
-				debug.setText("reader is not connected");
+				tv.setText("reader is not connected");
 			}
 		} else {
-			debug.setText("reader is connected");
+			tv.setText("reader is connected");
 		}
 		switch(v.getId()) {
 		case R.id.volume_change:
 			try {
-				Log.d(TAG, "volume_string  " + volume_string);
-				Log.d(TAG, "volume  " + volumeMap.get(volume_string));
-				if (globals.reader.setBuzzerVolume(volumeMap.get(volume_string), false)) {
-					Log.d(TAG, "volume changed to " + volume_string);
-					debug.setText("volume change success");
+				
+				Log.d(TAG, "volStr  " + volStr);
+				Log.d(TAG, "volume  " + volumeMap.get(volStr));
+				if (globals.reader.setBuzzerVolume(volumeMap.get(volStr), false)) {
+					globals.volume = volumeMap.get(volStr);
+					Log.d(TAG, "volume changed to " + volStr);
+					tv.setText("volume change success");
 				} else {
-					debug.setText("valume change failed");
+					tv.setText("valume change failed");
 				}
 			} catch (Exception e) {
 				Log.d(TAG, "volume change failed");
 				Log.d(TAG, e.getMessage());
-				debug.setText("volume change failed catch");
+				tv.setText("volume change failed catch");
 			}
-			
-			
 			break;			
 		case R.id.decrease:
 			try {
-				if (globals.reader.setRadioPower(decrease)) {
-					Log.d(TAG, "decrease:  " + decrease);
-					Log.d(TAG, "power decreased by " + decrease + " decibel");
-					debug.setText("decrease success");
+				if (globals.reader.setRadioPower(decMap.get(decStr))) {
+					globals.decrease = decMap.get(decStr);
+					Log.d(TAG, "decrease:  " + globals.decrease);
+					Log.d(TAG, "power decreased by " + globals.decrease + " decibel");
+					tv.setText("decrease success");
 				} else {
-					debug.setText("decrease failed");
+					tv.setText("decrease failed");
 				}
 			} catch (Exception e) {
 				Log.d(TAG, "radio power failed");
-				Log.d(TAG, e.getMessage());
-				debug.setText("decrease failed catch");
+				tv.setText("decrease failed catch");
 			}
 			break;
 		}			
@@ -158,64 +158,65 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 	@Override
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
 		RadioButton radioButton = (RadioButton) findViewById(checkedId);
-	    Toast.makeText(ConfigActivity.this,
-                "onCheckedChanged():" + radioButton.getText(),
-                Toast.LENGTH_SHORT).show();
 		switch (group.getId()) {
 		case R.id.volume_group:
-			volume_string = (String) radioButton.getText();
-			Log.d(TAG, volume_string);
+			volStr = (String) radioButton.getText();
+			Toast.makeText(ConfigActivity.this,
+	                "Volume will be " + volStr,
+	                Toast.LENGTH_SHORT).show();
+			Log.d(TAG, "volStr    " + volStr);
 			break;
 		case R.id.radio_power_group:
-			String decStr = (String) radioButton.getText();
+			decStr = (String) radioButton.getText();
+			Toast.makeText(ConfigActivity.this,
+	                "Radio Power will be " + decStr + " âœ• " + globals.MAX_RADIO_POWER,
+	                Toast.LENGTH_SHORT).show();
 			Log.d(TAG, "decStr   " + decStr);
-			decrease = decMap.get(decStr);
-			Log.d(TAG, decStr);
 			break;
 		}
 	}
 
 	@Override
 	public void onConnected() {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		
 	}
 
 	@Override
 	public void onDisconnected() {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		
 	}
 
 	@Override
 	public void onInventoryEPC(final String epc) {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		//this.epc = epc;
 		handler.post(new Runnable() {
 			public void run() {
-				debug.setText(epc);
+				tv.setText(epc);
 			}
 		});
 	}
 
 	@Override
 	public void onLinkLost() {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		
 	}
 
 	@Override
 	public void onReadTagData(String arg0, String arg1) {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		
 	}
 
 	@Override
 	public void onTriggerChaned(boolean arg0) {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		handler.post(new Runnable() {
 			public void run() {
-				debug.setText("onTriggerChanged");
+				tv.setText("onTriggerChanged");
 			}
 		});
 		globals.reader.inventoryTag(true, EnMaskFlag.None, 100);
@@ -223,13 +224,13 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 
 	@Override
 	public void onUploadTagData(String arg0) {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		
 	}
 
 	@Override
 	public void onWriteTagData(String arg0) {
-		// TODO ©“®¶¬‚³‚ê‚½ƒƒ\ƒbƒhEƒXƒ^ƒu
+		// TODO è‡ªå‹•ç”Ÿæˆã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ãƒ»ã‚¹ã‚¿ãƒ–
 		
 	}
 
