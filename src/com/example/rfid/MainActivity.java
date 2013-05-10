@@ -39,8 +39,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private String place;
 	private HttpPostTask hpt = null;
 	private MyHttpPostHandler hph = null;
-	private CountDownTimer sendTimer;
-	private Timer timer;
+	private CountDownTimer countDownTimer;
+	private Timer scheduledTimer;
 	public Globals globals;
 	
 	private static final int MENU_TAG_LIST = Menu.FIRST;
@@ -59,6 +59,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		tv = (TextView)findViewById(R.id.condition);
         globals.checkBluetooth(this);
         configureButtons();
+        //checkReaderState();
     }
 
     @Override
@@ -102,7 +103,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	Button connectBtn = (Button)findViewById(R.id.connect);
     	Button disconBtn = (Button)findViewById(R.id.disconnect);
     	Button readBtn = (Button)findViewById(R.id.read);
-    	Button decBtn = (Button)findViewById(R.id.decrease);
     	Button sendBtn = (Button)findViewById(R.id.send);
     	Button timerBtn = (Button)findViewById(R.id.timer);
     	Button loopBtn = (Button)findViewById(R.id.loop);
@@ -110,7 +110,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	connectBtn.setOnClickListener(this);
     	disconBtn.setOnClickListener(this);
     	readBtn.setOnClickListener(this);
-    	decBtn.setOnClickListener(this);
     	sendBtn.setOnClickListener(this);
     	timerBtn.setOnClickListener(this);
     	loopBtn.setOnClickListener(this);
@@ -128,8 +127,6 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         RadioButton placeButton = (RadioButton) findViewById(R.id.elab);
         place = (String) placeButton.getText();
     }
-    
-
     
 	@Override
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -160,17 +157,13 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				hph = new MyHttpPostHandler(this);
     			}
 				hpt = new HttpPostTask(this, server, hph);
-    			Row row = new Row();
-    			row.tag_id = "aaaaaa";
-    			row.place = "todai";
-    			if (globals == null) {
+				if (globals == null) {
     				Log.d(TAG, "globals null");
     				globals = (Globals) this.getApplication(); 
     			}
     			if (globals.list == null) {
     				Log.d(TAG, "list null");
     			}
-    			globals.list.add(row);
     			String jsonString = new Gson().toJson(globals.list, ArrayList.class);
     			Log.d(TAG, "jsonString   " + jsonString);
     			hpt.addPostParam("body", jsonString);
@@ -196,7 +189,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	    		tv.setText("failed");
     	    	}
     	    	*/
-    	    	Log.d("RFID", "connect onClick");
+    	    	Log.d(TAG, "connect onClick");
     			break;
     		case R.id.disconnect:
     			if (globals.reader.disconnect()) {
@@ -220,15 +213,15 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			}
     			break;
     		case R.id.timer:
-    			sendTimer = new CountDownTimer(this, this);
-    			sendTimer.execute("timer");
+    			countDownTimer = new CountDownTimer(this, this);
+    			countDownTimer.execute("timer");
     			break;
     		case R.id.loop:
     			Log.d(TAG, "loop");    			
     			// 3秒ごとにタグ読み取り
-    			if (timer == null) {
-    				timer = new Timer(true);
-    				timer.schedule(new TimerTask() {
+    			if (scheduledTimer == null) {
+    				scheduledTimer = new Timer(true);
+    				scheduledTimer.schedule(new TimerTask() {
     					public void run() {
     						globals.reader.inventoryTag(false, EnMaskFlag.None, 1000);
     					}
@@ -236,8 +229,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     				TextView tv = (TextView) findViewById(R.id.loop);
     				tv.setText("Loop Stop");
     			} else {
-    				timer.cancel();
-    				timer = null;
+    				scheduledTimer.cancel();
+    				scheduledTimer = null;
     				TextView tv = (TextView) findViewById(R.id.loop);
     				tv.setText("Loop");
     			}
@@ -258,7 +251,9 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     		}
     		@Override
     		protected Void doInBackground(Void... unused) {
-   			 	globals.reader.connect(globals.macAddress);
+    			if (!globals.reader.isConnect()) {
+   			 		globals.reader.connect(globals.macAddress);
+    			}
     			return null;
     		}
     		
@@ -271,7 +266,20 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     	};
     	task.execute(); // パラメータを渡す
     }
-    
+    /*
+    public void checkReaderState() {
+		TextView volTv = (TextView)findViewById(R.id.volume_blank);
+		TextView decTv = (TextView)findViewById(R.id.decrease_blank);
+		
+		if (globals.volume == null) {
+			volTv.setText("Default");
+		} 
+		switch (globals.decrease) {
+		case 
+		}
+    	
+    }
+    */
     @Override
     public void onReadTagData(String data, final String epc) {
     	Log.d(TAG, "In onReadTagData");
@@ -288,27 +296,38 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	@Override
 	public void onInventoryEPC(String epc) {
 		this.epc = epc;
-		Row row = new Row();
-		row.tag_id = epc;
-		row.place = place;
-		globals.list.add(row);
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				tv.setText("TagCount: " + globals.list.size());
-	    		Log.d(TAG, "" + globals.list.size());
-	    		if (sendTimer == null) {
-	    			sendTimer = new CountDownTimer(MainActivity.this, MainActivity.this);
-		    		sendTimer.execute("count down");
-	    		} else {
-	    			sendTimer.cancel(true);
-	    			sendTimer = null;
-	    			sendTimer = new CountDownTimer(MainActivity.this, MainActivity.this);
-	    			sendTimer.execute("count down");
-	    		}
-	    		
+		boolean overlapFlag = false;
+		for (Row row : globals.list) {
+			Log.d(TAG, "row " + row.tag_id + " new " + epc + " row.p " + row.place + " new.p " + place);
+			if (row.tag_id.equals(epc) && row.place.equals(place)) {// 同じIDのタグの重複を防ぐ
+				Log.d(TAG, "if in");
+				overlapFlag = true;
+				break;
 			}
-		});
+		}
+		if (!overlapFlag) {
+			Row newRow = new Row();
+			newRow.tag_id = epc;
+			newRow.place = place;
+			globals.list.add(newRow);
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					tv.setText("TagCount: " + globals.list.size());
+		    		Log.d(TAG, "" + globals.list.size());
+		    		if (countDownTimer == null) {
+		    			countDownTimer = new CountDownTimer(MainActivity.this, MainActivity.this);
+			    		countDownTimer.execute("count down");
+		    		} else {
+		    			countDownTimer.cancel(true);
+		    			countDownTimer = null;
+		    			countDownTimer = new CountDownTimer(MainActivity.this, MainActivity.this);
+		    			countDownTimer.execute("count down");
+		    		}
+		    		
+				}
+			});
+		}
 	}
 
 	@Override

@@ -78,7 +78,9 @@ public class HttpPostTask extends AsyncTask<Void, Void, Void> {
   // タスク開始時
   protected void onPreExecute() {
 	  // listを圧縮
-	  activity.globals.compressList();
+	  Log.d("onPreExecute", "before compress:   " + activity.globals.list.size());
+	  //activity.globals.compressList();
+	  Log.d("onPreExecute", "after compress:   " + activity.globals.list.size());
 	  // ダイアログを表示
 	  dialog = new ProgressDialog( activity );
 	  dialog.setMessage("通信中・・・");

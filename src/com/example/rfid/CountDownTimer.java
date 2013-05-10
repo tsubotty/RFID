@@ -76,9 +76,7 @@ public class CountDownTimer extends AsyncTask<String, Integer, Long> implements 
   protected void onPostExecute(Long result) {
     Log.d(TAG, "onPostExecute - " + result);
     dialog.dismiss();    
-	if (hpt == null) {
-		hph = new MyHttpPostHandler(this.activity);
-	}
+    hph = hph == null ? new MyHttpPostHandler(this.activity) : hph; // hph Ç™Ç‹Çæñ≥ÇØÇÍÇŒçÏÇÈÅB
 	hpt = new HttpPostTask(this.activity, activity.server, hph);
 	String jsonString = new Gson().toJson(activity.globals.list, ArrayList.class);
 	Log.d(TAG, "Count: " + activity.globals.list.size() + "  jsonString: " + jsonString);

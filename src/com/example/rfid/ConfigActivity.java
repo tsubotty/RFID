@@ -25,8 +25,6 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 public class ConfigActivity extends MainActivity implements OnClickListener, OnDotrEventListener, OnCheckedChangeListener{
 	//private DOTR_Util reader;
 	private static final String TAG = ConfigActivity.class.getSimpleName(); // Name of this class 
-	private Map<String, EnBuzzerVolume> volumeMap;
-	private Map<String, Integer> decMap; 
 	private String volStr;
 	private String decStr;
 	private Globals globals;
@@ -44,20 +42,11 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
         globals.reader.setOnDotrEventListener(this);
         tv = (TextView) findViewById(R.id.debug);
         
-        configureMap();
+        globals.configureMap();
 		configureButtons();
 		globals.checkBluetooth(this);
     }
-	public void configureMap() {
-    	volumeMap = new HashMap<String, EnBuzzerVolume>();
-    	volumeMap.put("Mute", EnBuzzerVolume.Mute);
-    	volumeMap.put("Low", EnBuzzerVolume.Mute);
-    	volumeMap.put("High", EnBuzzerVolume.Mute);
-    	decMap = new HashMap<String, Integer>();
-    	decMap.put("1/2", 3); 
-    	decMap.put("1/4", 6); 
-    	decMap.put("1/8", 9);
-	}
+
 	@Override
 	 public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, MENU_MAIN, 0, "Main");
@@ -88,17 +77,18 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 	protected void configureButtons() {
 	    Button volumeChangeBtn = (Button)findViewById(R.id.volume_change);
 	    Button decreaseBtn = (Button)findViewById(R.id.decrease);
-	    	
+	    Button defaultBtn = (Button)findViewById(R.id.default_button);
+	    
 	    volumeChangeBtn.setOnClickListener(this);
 	    decreaseBtn.setOnClickListener(this);
-	    	
+	    defaultBtn.setOnClickListener(this);
 	    /* volume_change_radio_button */
 	    RadioGroup volumeGroup = (RadioGroup) findViewById(R.id.volume_group);
 	    volumeGroup.check(R.id.mute);
 	    volumeGroup.setOnCheckedChangeListener(this);
 	    RadioButton volumeButton = (RadioButton) findViewById(volumeGroup.getCheckedRadioButtonId());
 	    volStr = (String) volumeButton.getText();
-	    //volume = decMap.get("1/4");
+	    //volume = globals.decMap.get("1/4");
 	    /* radio_power_radio_button */
 	    RadioGroup powerGroup = (RadioGroup) findViewById(R.id.radio_power_group);
 	    powerGroup.check(R.id.four);
@@ -120,12 +110,11 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 		}
 		switch(v.getId()) {
 		case R.id.volume_change:
-			try {
-				
+			try {				
 				Log.d(TAG, "volStr  " + volStr);
-				Log.d(TAG, "volume  " + volumeMap.get(volStr));
-				if (globals.reader.setBuzzerVolume(volumeMap.get(volStr), false)) {
-					globals.volume = volumeMap.get(volStr);
+				Log.d(TAG, "volume  " + globals.volMap.get(volStr));
+				if (globals.reader.setBuzzerVolume(globals.volMap.get(volStr), false)) {
+					globals.volume = globals.volMap.get(volStr);
 					Log.d(TAG, "volume changed to " + volStr);
 					tv.setText("volume change success");
 				} else {
@@ -139,8 +128,8 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 			break;			
 		case R.id.decrease:
 			try {
-				if (globals.reader.setRadioPower(decMap.get(decStr))) {
-					globals.decrease = decMap.get(decStr);
+				if (globals.reader.setRadioPower(globals.decMap.get(decStr))) {
+					globals.decrease = globals.decMap.get(decStr);
 					Log.d(TAG, "decrease:  " + globals.decrease);
 					Log.d(TAG, "power decreased by " + globals.decrease + " decibel");
 					tv.setText("decrease success");
@@ -150,6 +139,20 @@ public class ConfigActivity extends MainActivity implements OnClickListener, OnD
 			} catch (Exception e) {
 				Log.d(TAG, "radio power failed");
 				tv.setText("decrease failed catch");
+			}
+			break;
+		case R.id.default_button:
+			try {
+				if (globals.reader.setDefaultParameter()) {
+					tv.setText("set default success");
+					
+					// globalsの変数を既定値に戻しておく
+					globals.decrease = 0;
+					globals.volume = null;
+				}
+			} catch (Exception e) {
+				Log.d(TAG, "set default failed");
+				tv.setText("set default failed catch");
 			}
 			break;
 		}			
