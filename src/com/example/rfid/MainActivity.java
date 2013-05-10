@@ -36,10 +36,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	private Handler handler; // For UI control
 	private String epc; // EPC Tag Name which are read from the reader
 	public String server;
-	private String _place;
-	private HttpPostTask _hpt = null;
-	private MyHttpPostHandler _hph = null;
-	private SendTimer _timer;
+	private String place;
+	private HttpPostTask hpt = null;
+	private MyHttpPostHandler hph = null;
+	private CountDownTimer sendTimer;
+	private Timer timer;
 	public Globals globals;
 	
 	private static final int MENU_TAG_LIST = Menu.FIRST;
@@ -125,7 +126,7 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
         place_radioGroup.check(R.id.elab);
         place_radioGroup.setOnCheckedChangeListener(this);
         RadioButton placeButton = (RadioButton) findViewById(R.id.elab);
-        _place = (String) placeButton.getText();
+        place = (String) placeButton.getText();
     }
     
 
@@ -133,17 +134,20 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 	@Override
 	public void onCheckedChanged(RadioGroup group, int checkedId) {
 		RadioButton radioButton = (RadioButton) findViewById(checkedId);
-	    Toast.makeText(MainActivity.this,
-                "onCheckedChanged():" + radioButton.getText(),
-                Toast.LENGTH_SHORT).show();
 		switch (group.getId()) {
 		case R.id.server_radiogroup:
 			server = (String) radioButton.getText();
+			Toast.makeText(MainActivity.this,
+		                "Post to " + server,
+		                Toast.LENGTH_SHORT).show();
 			Log.d(TAG, server);
 			break;
 		case R.id.place_radiogroup:
-			_place = (String) radioButton.getText();
-			Log.d(TAG, _place);
+			place = (String) radioButton.getText();
+			Toast.makeText(MainActivity.this,
+		                "Place is set to " + place,
+		                Toast.LENGTH_SHORT).show();
+			Log.d(TAG, place);
 			break;
 		}            
 	}
@@ -152,10 +156,10 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     public void onClick(View v) {
     	switch(v.getId()) {
     		case R.id.send:
-    			if (_hph == null) {
-    				_hph = new MyHttpPostHandler(this);
+    			if (hph == null) {
+    				hph = new MyHttpPostHandler(this);
     			}
-				_hpt = new HttpPostTask(this, server, _hph);
+				hpt = new HttpPostTask(this, server, hph);
     			Row row = new Row();
     			row.tag_id = "aaaaaa";
     			row.place = "todai";
@@ -169,11 +173,11 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			globals.list.add(row);
     			String jsonString = new Gson().toJson(globals.list, ArrayList.class);
     			Log.d(TAG, "jsonString   " + jsonString);
-    			_hpt.addPostParam("body", jsonString);
-    			_hpt.execute();
+    			hpt.addPostParam("body", jsonString);
+    			hpt.execute();
     			try {
-    				tv.setText(_hph._response);
-    				Log.d(TAG, _hph._response);
+    				tv.setText(hph._response);
+    				Log.d(TAG, hph._response);
     			} catch (Exception e) {
     				Log.d(TAG, e.getMessage());
     			}
@@ -216,18 +220,27 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			}
     			break;
     		case R.id.timer:
-    			_timer = new SendTimer(this, this);
-    			_timer.execute("timer");
+    			sendTimer = new CountDownTimer(this, this);
+    			sendTimer.execute("timer");
     			break;
     		case R.id.loop:
     			Log.d(TAG, "loop");    			
     			// 3秒ごとにタグ読み取り
-    			Timer mTimer = new Timer(true);
-    			mTimer.schedule(new TimerTask() {
-    				public void run() {
-        				globals.reader.inventoryTag(false, EnMaskFlag.None, 1000);
-    				}
-    			}, 1000, 3000);
+    			if (timer == null) {
+    				timer = new Timer(true);
+    				timer.schedule(new TimerTask() {
+    					public void run() {
+    						globals.reader.inventoryTag(false, EnMaskFlag.None, 1000);
+    					}
+    				}, 1000, 3000);
+    				TextView tv = (TextView) findViewById(R.id.loop);
+    				tv.setText("Loop Stop");
+    			} else {
+    				timer.cancel();
+    				timer = null;
+    				TextView tv = (TextView) findViewById(R.id.loop);
+    				tv.setText("Loop");
+    			}
     			break;
     	}
     }
@@ -277,21 +290,21 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
 		this.epc = epc;
 		Row row = new Row();
 		row.tag_id = epc;
-		row.place = _place;
+		row.place = place;
 		globals.list.add(row);
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
 				tv.setText("TagCount: " + globals.list.size());
 	    		Log.d(TAG, "" + globals.list.size());
-	    		if (_timer == null) {
-	    			_timer = new SendTimer(MainActivity.this, MainActivity.this);
-		    		_timer.execute("hoge");
+	    		if (sendTimer == null) {
+	    			sendTimer = new CountDownTimer(MainActivity.this, MainActivity.this);
+		    		sendTimer.execute("count down");
 	    		} else {
-	    			_timer.cancel(true);
-	    			_timer = null;
-	    			_timer = new SendTimer(MainActivity.this, MainActivity.this);
-	    			_timer.execute("hoge");
+	    			sendTimer.cancel(true);
+	    			sendTimer = null;
+	    			sendTimer = new CountDownTimer(MainActivity.this, MainActivity.this);
+	    			sendTimer.execute("count down");
 	    		}
 	    		
 			}

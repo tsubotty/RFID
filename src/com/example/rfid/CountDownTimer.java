@@ -11,39 +11,39 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.util.Log;
 
-public class SendTimer extends AsyncTask<String, Integer, Long> implements OnCancelListener{
+public class CountDownTimer extends AsyncTask<String, Integer, Long> implements OnCancelListener{
 
   final String TAG = "SendTimer";
-  ProgressDialog _dialog;
-  Context _context;
-  //ArrayList<Row> _list;
-  //String _server;
-  MainActivity _activity;
-  HttpPostTask _hpt = null;
-  MyHttpPostHandler _hph = null;
+  ProgressDialog dialog;
+  Context context;
+  MainActivity activity;
+  HttpPostTask hpt = null;
+  MyHttpPostHandler hph = null;
     
-  public SendTimer(Context context, MainActivity activity) {
-    this._context = context;
-    this._activity = activity;
+  public CountDownTimer(Context context, MainActivity activity) {
+    this.context = context;
+    this.activity = activity;
   }
   
   @Override
   protected void onPreExecute() {
     Log.d(TAG, "onPreExecute");
-    _dialog = new ProgressDialog(_context);
-    _dialog.setTitle("Please wait");
-    _dialog.setMessage("Loading data...");
-    _dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-    _dialog.setCancelable(true);
-    _dialog.setOnCancelListener(this);
-    _dialog.setMax(100);
-    _dialog.setProgress(0);
-    _dialog.show();		
+    dialog = new ProgressDialog(context);
+    dialog.setTitle("Please wait");
+    dialog.setMessage("Loading data...");
+    dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+    dialog.setCancelable(true);
+    dialog.setOnCancelListener(this);
+    dialog.setMax(100);
+    dialog.setProgress(0);
+    dialog.show();		
   }
 
   @Override
   protected Long doInBackground(String... params) {
-    Log.d(TAG, "doInBackground - " + params[0]);
+	  if (params != null) {
+		  Log.d(TAG, "doInBackground - " + params[0]);
+	  }
     
     try {
       for(int i=0; i<10; i++){
@@ -63,28 +63,27 @@ public class SendTimer extends AsyncTask<String, Integer, Long> implements OnCan
   @Override
   protected void onProgressUpdate(Integer... values) {
     Log.d(TAG, "onProgressUpdate - " + values[0]);
-    _dialog.setProgress(values[0]);
+    dialog.setProgress(values[0]);
   }
   
   @Override
   protected void onCancelled() {
     Log.d(TAG, "onCancelled");
-    _dialog.dismiss();
+    dialog.dismiss();
   }
 
   @Override
   protected void onPostExecute(Long result) {
     Log.d(TAG, "onPostExecute - " + result);
-    _dialog.dismiss();
-    
-	if (_hpt == null) {
-		_hph = new MyHttpPostHandler(this._activity);
+    dialog.dismiss();    
+	if (hpt == null) {
+		hph = new MyHttpPostHandler(this.activity);
 	}
-	_hpt = new HttpPostTask(this._activity, _activity.server, _hph);
-	String jsonString = new Gson().toJson(_activity.globals.list, ArrayList.class);
-	Log.d(TAG, "Count: " + _activity.globals.list.size() + "  jsonString: " + jsonString);
-	_hpt.addPostParam("body", jsonString);
-	_hpt.execute();
+	hpt = new HttpPostTask(this.activity, activity.server, hph);
+	String jsonString = new Gson().toJson(activity.globals.list, ArrayList.class);
+	Log.d(TAG, "Count: " + activity.globals.list.size() + "  jsonString: " + jsonString);
+	hpt.addPostParam("body", jsonString);
+	hpt.execute();
   }
 
   @Override
