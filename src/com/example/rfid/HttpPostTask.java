@@ -37,7 +37,7 @@ public class HttpPostTask extends AsyncTask<Void, Void, Void> {
   private String response_encoding = "UTF-8";
 
   // 初期化事項
-  private Activity parent_activity = null;
+  private MainActivity activity = null;
   private String post_url = null;
   private Handler ui_handler = null;
   private List<NameValuePair> post_params = null;
@@ -50,10 +50,10 @@ public class HttpPostTask extends AsyncTask<Void, Void, Void> {
 
 
   // 生成時
-  public HttpPostTask( Activity parent_activity, String post_url, Handler ui_handler )
+  public HttpPostTask( MainActivity activity, String post_url, Handler ui_handler )
   {
     // 初期化
-    this.parent_activity = parent_activity;
+    this.activity = activity;
     this.post_url = post_url;
     this.ui_handler = ui_handler;
 
@@ -77,10 +77,12 @@ public class HttpPostTask extends AsyncTask<Void, Void, Void> {
 
   // タスク開始時
   protected void onPreExecute() {
-    // ダイアログを表示
-    dialog = new ProgressDialog( parent_activity );
-    dialog.setMessage("通信中・・・");
-    dialog.show();
+	  // listを圧縮
+	  activity.globals.compressList();
+	  // ダイアログを表示
+	  dialog = new ProgressDialog( activity );
+	  dialog.setMessage("通信中・・・");
+	  dialog.show();
 
     // レスポンスハンドラを生成
     response_handler = new ResponseHandler<Void>() {

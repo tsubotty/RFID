@@ -1,6 +1,8 @@
 package com.example.rfid;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jp.co.tss21.uhfrfid.dotr_android.DOTR_Util;
@@ -15,7 +17,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 public class Globals extends Application {
-	public ArrayList<Row> list = new ArrayList<Row>();
+	public List<Row> list = new ArrayList<Row>();
 	public DOTR_Util reader = new DOTR_Util();
 	public String macAddress; // = "00:18:9A:05:9C:62";
 	public TagAccessParameter param = new TagAccessParameter();
@@ -55,6 +57,14 @@ public class Globals extends Application {
 		} else {
 			activity.finish();
 		}    
+	}
+	
+	public void compressList() {
+		Set<Row> set = new HashSet<Row>();
+		set.addAll(list);
+		List<Row> uniqueList = new ArrayList<Row>();
+		uniqueList.addAll(set);
+		list = uniqueList;
 	}
 }
 	//ary = Constants.getInstance().getArray(); ƒVƒ“ƒOƒ‹ƒgƒ“

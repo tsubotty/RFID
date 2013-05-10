@@ -176,8 +176,8 @@ public class MainActivity extends Activity implements OnClickListener, OnDotrEve
     			hpt.addPostParam("body", jsonString);
     			hpt.execute();
     			try {
-    				tv.setText(hph._response);
-    				Log.d(TAG, hph._response);
+    				tv.setText(hph.response);
+    				Log.d(TAG, hph.response);
     			} catch (Exception e) {
     				Log.d(TAG, e.getMessage());
     			}
